@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import $ from 'jquery';
+import _ from 'lodash';
 
 import WikiList from './wikiList';
+import SearchBar from './searchBar';
 
 export default class App extends Component {
   constructor(props) {
@@ -9,15 +11,14 @@ export default class App extends Component {
 
     this.state = {
       wikiList: [],
-      search: "sup",
       gotData: false
     }
-    this.getWiki = this.getWiki.bind(this);
+    this.getWiki('');
   }
 
-  getWiki(){
+  getWiki(term){
     $.ajax({
-      url: `https://en.wikipedia.org/w/api.php?action=opensearch&search=${this.state.search}&format=json`,
+      url: `https://en.wikipedia.org/w/api.php?action=opensearch&search=${term}&format=json`,
       jsonp: "callback",
       dataType: "jsonp",
       data: {
@@ -33,12 +34,16 @@ export default class App extends Component {
   }
 
   render() {
+    const getWiki = _.debounce((term) => { this.getWiki(term) }, 300);
+
     return (
       <div>
         <div>
-          <button className="btn btn-primary right" onClick={this.getWiki}>
-            Search!
-          </button>
+          <SearchBar onSearchTermChange={getWiki} />
+          <a href="https://en.wikipedia.org/wiki/Special:Random" target="_blank">
+            <button>Random</button>
+          </a>
+
         </div>
         <WikiList wikiData={this.state.wikiData} gotData={this.state.gotData}/>
         <h3>

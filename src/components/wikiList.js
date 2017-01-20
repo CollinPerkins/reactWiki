@@ -37,7 +37,8 @@ export default class WikiList extends Component {
   render() {
     return (
       <div>
-        {this.showList(this.props.wikiData, this.props.gotData)}
+        {this.props.wikiData ? this.showList(this.props.wikiData, this.props.gotData) : ""}
+        {console.log(this.props.wikiData)}
       </div>
     );
   }
