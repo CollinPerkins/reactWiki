@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
-import axios from 'axios';
+import $ from 'jquery';
+
+import WikiList from './wikiList';
 
 export default class App extends Component {
   constructor(props) {
@@ -7,32 +9,26 @@ export default class App extends Component {
 
     this.state = {
       wikiList: [],
-      search: "sup"
+      search: "sup",
+      gotData: false
     }
     this.getWiki = this.getWiki.bind(this);
   }
 
   getWiki(){
-    axios.get(`https://en.wikipedia.org/w/api.php?action=opensearch&search=${this.state.search}&format=json`)
-    .then(response => {
-      var searchResultsArray = response.data[1];
-      var searchResultsDescription = response.data[2];
-      var searchResultsLink = response.data[3];
-
-      let prom = new Promise(function (resolve, reject) {
-        var newResponse = searchResultsArray.map(function(temp, index){
-          return {
-            article: searchResultsArray[index],
-            description: searchResultsDescription[index],
-            link: searchResultsLink[index]
-          }
+    $.ajax({
+      url: `https://en.wikipedia.org/w/api.php?action=opensearch&search=${this.state.search}&format=json`,
+      jsonp: "callback",
+      dataType: "jsonp",
+      data: {
+        format: "json"
+      },
+      success: function( response ) {
+        this.setState({
+          wikiData: response,
+          gotData: true
         })
-        resolve(newResponse);
-      })
-      prom.then((value) => {
-        this.setState({wikiList: value})
-        console.log(this.state);
-      });
+      }.bind(this)
     });
   }
 
@@ -44,7 +40,10 @@ export default class App extends Component {
             Search!
           </button>
         </div>
-        <h3><a href="https://github.com/CollinPerkins/reactWiki" target="_blank">Github Link for React Wiki App</a></h3>
+        <WikiList wikiData={this.state.wikiData} gotData={this.state.gotData}/>
+        <h3>
+          <a href="https://github.com/CollinPerkins/reactWiki" target="_blank">Github Link for React Wiki App</a>
+        </h3>
       </div>
     );
   }
